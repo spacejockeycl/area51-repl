@@ -1,5 +1,3 @@
-;;;-*- mode:lisp -*-
-
 (in-package :repl-user)
 
 ;; Change prompt like sbcl's repl
@@ -18,12 +16,12 @@
 ; (color-scheme "off")
 (color-scheme "default")
 
-;; You can define your own magic commands
-;; If you want to put some message on the screen, use `cl-repl:message-from-magic` instead of `cl:format`.
+;; You can define your own commands
+;; If you want to put some message on the screen, use `cl-repl:message` instead of `cl:format`.
 ;; This function always returns `"nil"` (not `nil`).
-(define-magic pwd (&rest args)
+(define-command pwd (&rest args)
   (declare (ignore args))
-  ; Put usage in one line. This documentation can be refer by %help magic.
+  ; Put usage in one line. This documentation can be refer by %help
   "Show current working directory."
   ; Return value should be readable by cl:read-from-string
   (format nil "~s" *default-pathname-defaults*))
@@ -31,4 +29,3 @@
 ;; disable syntax highlighting
 ; (disable-syntax)
 
-;;; vim: set filetype=lisp lisp: 

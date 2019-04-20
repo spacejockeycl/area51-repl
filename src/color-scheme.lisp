@@ -1,5 +1,30 @@
 (in-package :cl-repl)
 
+;; TODO use constants instead of magic numbers
+
+;; States
+(defparameter *default-prompt-color* 40)
+(defparameter *debugger-prompt-color* 9)
+(defparameter *output-indicator-color* 9)
+(defparameter *splash-color* 9)
+(defparameter *condition-color* 9)
+(defparameter *section-color* 21)
+(defparameter *message-color* 248)
+
+;; Syntaxic coloring
+(defparameter *magic-syntax-color* 39)
+(defparameter *string-syntax-color* 184)
+(defparameter *variable-syntax-color* 118)
+(defparameter *constant-syntax-color* 118)
+(defparameter *lambda-syntax-color* 39)
+(defparameter *definition-syntax-color* 118)
+(defparameter *keyword-syntax-color* 39)
+(defparameter *special-syntax-color* 197)
+(defparameter *function-syntax-color* 197)
+(defparameter *boolean-syntax-color* 197)
+(defparameter *normal-syntax-color*  nil)
+
+
 (defvar *color-schemes* (make-hash-table :test #'equal))
 
 (defun find-color-scheme (name)
@@ -35,8 +60,7 @@
   ("output-indicator" 9)
   ("condition" 9)
   ("section" 21)
-  ("message" 248)
-  ("logo" 9))
+  ("message" 248))
 
 (define-color-scheme "off" ()
   ("magic-syntax" nil)
@@ -55,7 +79,5 @@
   ("output-indicator" nil)
   ("condition" nil)
   ("section" nil)
-  ("message" nil)
-  ("logo" nil))
-
+  ("message" nil))
 

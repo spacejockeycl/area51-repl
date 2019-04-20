@@ -25,7 +25,7 @@
   ("\\C-s" #'unbind-key)
   ("\\C-l" (lambda (&rest args)
              (declare (ignore args))
-             (invoke-magic "%cls"))))
+             (invoke-command "%clear"))))
 
 (defun set-keymap (name)
   (let ((keymap (find-keymap name)))

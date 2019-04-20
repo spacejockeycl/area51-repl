@@ -1,188 +1,82 @@
-(in-package :cl-repl)
+(in-package #:cl-repl)
 
-(defvar *magic-commands* nil)
+;; Having commands is a pretty common pattern, for inspiration, take a look at:
+;;
+;; SBCL ACL REPL
+;; https://github.com/sbcl/sbcl/blob/419bef671943cd71ef6c4a097551c893742dddde/contrib/sb-aclrepl/repl.lisp
+;;
+;; StumpWM
+;; https://github.com/stumpwm/stumpwm/blob/4653857b5039d29ef2b0fedfe3e4c656bd000c41/command.lisp
+;;
+;; Climacs (v2)
+;; https://github.com/robert-strandh/Second-Climacs/blob/ed1dda65ce51a713207d88915c71ae56e15b7c23/Command/command.lisp
 
-(defmacro define-magic (name args &body body)
-  (let ((symname (format nil "%~(~a~)" name)))
-    `(progn
-       #+sbcl
-       (sb-ext:without-package-locks
-         (export (intern ,symname :cl) :cl)
-         (shadow (intern ,symname :cl) :cl))
-       (push (list ,symname #'(lambda ,args ,@body))
-             *magic-commands*))))
 
-(defmacro message-from-magic (message &rest args)
+(defstruct command
+  name
+  description
+  function)
+
+(defvar *commands*
+  (make-hash-table :test #'equal)
+  "Contains the commands that can be run at the toplevel repl with the \"%\" prefix.")
+
+(parse-body '((declare (ignore args))
+              (if (probe-file filename)
+                  (let ((code (format nil "(progn ~a )" (read-file-into-string filename))))
+                    (if (line-continue-p code)
+                        (message "Error: Unexpected EOF.")
+                        code))
+                  (message "Error: File not found.")))
+            :documentation "Asdf")
+
+(defmacro define-command (name args description &body body)
+  "Define a command, it's just like a function."
+  (multiple-value-bind (actual-body declarations documentation)
+      (parse-body body)
+      (once-only ((description description)
+                  (symbol (if (symbolp name)
+                              (list 'quote name)
+                              (symbolicate name))))
+        `(progn
+           (check-type ,description string)
+           (setf (gethash (string-downcase ,symbol) *commands*)
+                 (make-command :name ,symbol
+                               :description ,description
+                               :function #'(lambda ,args
+                                             ,@declarations
+                                             ,(or documentation description)
+                                             ,@actual-body)))))))
+
+;; TODO use a function instead
+(defmacro message (message &rest args)
+  "Print a message on the standard ouput, with color"
   `(progn
      (format t ,(color *message-color* message) ,@args)
      (finish-output)
      "nil"))
 
-(defun invoke-magic (magic &rest args)
-  (loop :for (name body) :in *magic-commands*
-        :when (string= name magic)
-        :do (return-from invoke-magic
-              (handler-case (apply body args)
-                (error (c) (message-from-magic "Error: ~a" c)))))
-  (message-from-magic "Command not found.: ~a" magic))
+(defun find-command (name)
+  ;; name has the form "%name"
+  (gethash (subseq name 1) *commands*))
 
-(defun input-magic-p (&optional input)
-  (string-starts-with input "%"))
+(defun find-command-function (name)
+  "Find the command's function."
+  (command-function (find-command name)))
 
-(define-magic run (filename &rest args)
-  "Execute file in current enviroment."
-  (declare (ignore args))
-  (if (probe-file filename)
-      (let ((code (format nil "(progn ~a )" (read-file-into-string filename))))
-        (if (line-continue-p code)
-            (message-from-magic "Error: Unexpected EOF.")
-            code))
-      (message-from-magic "Error: File not found.")))
+(defun invoke-command (name &rest args)
+    (if (find-command name)
+        #+before (handler-case (apply body args)
+                   (error (c) (message "Error: ~a" c)))
+        (apply (find-command-function name) args)
+        (message "Command not found.: ~a" name)))
 
-(defun edit-file-and-read (editor filename)
-  (message-from-magic "Openning file: ~a~%" filename)
-  (uiop:run-program `(,editor ,filename)
-                    :input :interactive
-                    :output :interactive)
-  (message-from-magic "Evaluating edited code...~%")
-  (invoke-magic "%run" filename))
+(defun command-p (&optional input)
+  "Is the given input a command?"
+  (starts-with #\% input))
 
-(define-magic edit (&optional filename &rest args)
-  "Edit code with text editor specified by $EDITOR."
-  (declare (ignore args))
-  (let ((editor (uiop:getenv "EDITOR")))
-    (if (null filename)
-        (uiop:with-temporary-file
-            (:stream s :pathname p :type "lisp" :prefix "cl-repl-edit" :suffix "")
-          (setf filename (namestring p))
-          (message-from-magic "CL-REPL will make a temporary file named: ~a~%" filename)
-          (format s "#|-*- mode:lisp -*-|#~2%")
-          (close s)
-          (edit-file-and-read editor filename))
-        (edit-file-and-read editor filename))))
 
-(define-magic cd (&optional (dest (uiop:getenv "HOME")) &rest args)
-  "Change working directory."
-  (declare (ignore args))
-  (handler-case
-      (progn
-        (setf dest (truename dest))
-        (uiop:chdir dest)
-        (setf *default-pathname-defaults* dest)
-        (format nil "~s"dest))
-    (error () (message-from-magic "No such directory."))))
 
-(define-magic time (&rest forms)
-  "Alias to (time <form>)."
-  (let ((code (format nil "(time ~{ ~a~})" forms)))
-    (if (line-continue-p code)
-        (message-from-magic "Error: Unexpected EOF.")
-        code)))
 
-(define-magic expand (&rest forms)
-  "Alias to (macroexpand-1 (quote <form>))"
-  (let ((code (format nil "(macroexpand-1 '~{ ~a~})" forms)))
-    (if (line-continue-p code)
-        (message-from-magic "Error: Unexpected EOF.")
-        code)))
-
-(define-magic inspect (object &rest args)
-  "Alias to (inspect <object>)."
-  (declare (ignore args))
-  (let ((code (format nil "(inspect ~a)" object)))
-    (if (line-continue-p code)
-        (message-from-magic "Error: Unexpected EOF.")
-        code)))
-
-(define-magic step (&rest forms)
-  "Alias to (step <form>)."
-  (let ((code (format nil "(step ~{ ~a~})" forms)))
-    (if (line-continue-p code)
-        (message-from-magic "Error: Unexpected EOF.")
-        code)))
-
-#+quicklisp
-(define-magic load (&rest systems)
-  "Alias to (ql:quickload '(<system>...) :silent t)."
-  (loop :repeat (length systems)
-        :for system := (pop systems) :while system
-        :do (handler-case
-                (progn
-                  (ql:quickload (intern system :keyword) :silent t)
-                  (message-from-magic "Loaded.: `~a`" system))
-              (error (c) (message-from-magic "Failed to load system.: `~a`: ~a" system c)))
-        :when (car systems) :do (terpri)
-        :finally (return "nil")))
-
-(define-magic package (&optional (package "cl-user") &rest args)
-  "Alias to (in-pacakge <package>)."
-  (declare (ignore args))
-  (handler-case
-      (let ((p (current-package)))
-        (setf *package* (find-package (read-from-string package)))
-        (message-from-magic "Package changed.: From ~(`~a` into `~a`~)" p (current-package)))
-    (error () (message-from-magic "Failed to change package."))))
-
-(flet ((probe-command (cmd)
-         (handler-case
-             (progn
-               (uiop:run-program
-                (format nil "command -v ~a" cmd))
-               t)
-           (error () nil)))
-       (execute-foreign (cmd args)
-         (write-to-string
-          (caddr
-           (multiple-value-list
-            (uiop:run-program
-             (format nil "~a \"~{~a ~}\"" cmd
-                     (mapcar #'(lambda (a)
-                                 (ppcre:regex-replace-all "\"" a "\\\""))
-                             args))
-             :output :interactive
-             :input :interactive
-             :error-output :interactive
-             :ignore-error-status t))))))
-  (when (probe-command "python")
-    (define-magic python (&rest args)
-      "Execute line with Python."
-      (execute-foreign "python -c" args)))
-  (when (probe-command "ruby")
-    (define-magic ruby (&rest args)
-      "Execute line with Ruby."
-      (execute-foreign "ruby -e" args)))
-  (when (probe-command "perl")
-    (define-magic perl (&rest args)
-      "Execute line with Perl."
-      (execute-foreign "perl -e" args))))
-
-(define-magic doc (target &rest args)
-  "Show description of given object."
-  (declare (ignore args))
-  (handler-case
-      (let ((s (make-array '(0)
-                           :element-type 'base-char
-                           :fill-pointer 0
-                           :adjustable t)))
-        (with-output-to-string (sb s)
-          (describe (read-from-string target) sb))
-        (invoke-pager s)
-        "nil")
-    (error () (message-from-magic "No description given on `~a.`" target))))
-
-(define-magic cls (&rest args)
-  "Clear screen."
-  (declare (ignore args))
-  (uiop:run-program "clear" :output *standard-output*)
-  (when (> *debugger-level* 0)
-    (debugger-banner))
-  (read-input))
-
-(define-magic help (&rest args)
-  "List available magic commands and usages."
-  (declare (ignore args))
-  (loop :for (name body) :in *magic-commands*
-        :do (format t "~16,,a~a~%" name (documentation body 'function)))
-  "nil")
 
 
