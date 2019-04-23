@@ -1,38 +1,40 @@
 (in-package :cl-repl)
 
-;; TODO use constants instead of magic numbers
-
 ;; States
-(defparameter *default-prompt-color* 40)
-(defparameter *debugger-prompt-color* 9)
-(defparameter *output-indicator-color* 9)
-(defparameter *splash-color* 9)
-(defparameter *condition-color* 9)
-(defparameter *section-color* 21)
-(defparameter *message-color* 248)
+(defparameter *default-prompt-color* nil)
+(defparameter *debugger-prompt-color* nil)
+(defparameter *output-indicator-color* nil)
+(defparameter *splash-color* nil)
+(defparameter *condition-color* nil)
+(defparameter *section-color* nil)
+(defparameter *message-color* nil)
 
 ;; Syntaxic coloring
-(defparameter *magic-syntax-color* 39)
-(defparameter *string-syntax-color* 184)
-(defparameter *variable-syntax-color* 118)
-(defparameter *constant-syntax-color* 118)
-(defparameter *lambda-syntax-color* 39)
-(defparameter *definition-syntax-color* 118)
-(defparameter *keyword-syntax-color* 39)
-(defparameter *special-syntax-color* 197)
-(defparameter *function-syntax-color* 197)
-(defparameter *boolean-syntax-color* 197)
+(defparameter *magic-syntax-color* nil)
+(defparameter *string-syntax-color* nil)
+(defparameter *variable-syntax-color* nil)
+(defparameter *constant-syntax-color* nil)
+(defparameter *lambda-syntax-color* nil)
+(defparameter *definition-syntax-color* nil)
+(defparameter *keyword-syntax-color* nil)
+(defparameter *special-syntax-color* nil)
+(defparameter *function-syntax-color* nil)
+(defparameter *boolean-syntax-color* nil)
 (defparameter *normal-syntax-color*  nil)
 
 
-(defvar *color-schemes* (make-hash-table :test #'equal))
+(defvar *color-schemes* (make-hash-table :test #'equal)
+  "hash-table of the color-schemes, keyed by their name as string")
 
 (defun find-color-scheme (name)
+  (check-type name string)
   (gethash name *color-schemes*))
 
 (defmacro define-color-scheme (name (&optional parent) &body specs)
+  (check-type name string)
   `(setf (gethash ,name *color-schemes*) (cons ,parent ',specs)))
 
+;; FIXME code smell: eval
 (defun set-color (spec color)
   (eval (read-from-string (format nil "(setf cl-repl::*~a-color* ~a)" spec color))))
 
@@ -44,23 +46,23 @@
           :do (set-color spec color))))
 
 (define-color-scheme "default" ()
-  ("magic-syntax" 39)
-  ("string-syntax" 184)
-  ("variable-syntax" 118)
-  ("constant-syntax" 118)
-  ("lambda-syntax" 39)
-  ("definition-syntax" 118)
-  ("keyword-syntax" 39)
-  ("special-syntax" 197)
-  ("function-syntax" 197)
-  ("boolean-syntax" 197)
+  ("magic-syntax" +deep-blue+)          ; 39
+  ("string-syntax" +yellow+)            ; 184
+  ("variable-syntax" +chartreuse+)      ; 118
+  ("constant-syntax" +chartreuse+)
+  ("lambda-syntax" +deep-blue+)
+  ("definition-syntax" +chartreuse+)
+  ("keyword-syntax" +deep-blue+)
+  ("special-syntax" +deep-pink+)        ; 197
+  ("function-syntax" +deep-pink+)
+  ("boolean-syntax" +deep-pink+)
   ("normal-syntax" nil)
-  ("default-prompt" 40)
-  ("debugger-prompt" 9)
-  ("output-indicator" 9)
-  ("condition" 9)
-  ("section" 21)
-  ("message" 248))
+  ("default-prompt" +green+)
+  ("debugger-prompt" +red+)
+  ("output-indicator" +red+)
+  ("condition" +red+)
+  ("section" +blue+)                    ; 21
+  ("message" +grey18+))
 
 (define-color-scheme "off" ()
   ("magic-syntax" nil)
@@ -80,4 +82,6 @@
   ("condition" nil)
   ("section" nil)
   ("message" nil))
+
+(color-scheme "default")
 

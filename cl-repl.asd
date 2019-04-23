@@ -14,7 +14,7 @@
                 :components ((:file "package")
                              (:file "util")
                              (:file "color")
-                             ;; (:file "color-constants")
+                             (:file "color-constants")
                              (:file "color-scheme")
                              (:file "highlight")
                              (:file "keymap")
