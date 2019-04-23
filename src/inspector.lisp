@@ -101,4 +101,7 @@
 
 (defun install-inspector ()
   #+sbcl
-  (setf sb-impl::*inspect-fun* #'inspector))
+  (setf sb-impl::*inspect-fun* #'inspector)
+  #-sbcl
+  (warn "inspector not implemented on this lisp implementation"))
+
