@@ -23,12 +23,14 @@
 (defparameter *repl-flush-screen-p* nil
   "Do you want to flush the screen before and after the repl is run?")
 
-(progn
+(defun setup-readline ()
+  (cffi:load-foreign-library 'cl-readline:readline)
   (enable-syntax)
   (rl:register-function :complete #'completer)
   (install-inspector))
 
-(defun main (&optional argv)
+(defun main ()
+  (setup-readline)
   (site-init)
   (when *repl-flush-screen-p* (flush-screen))
   (with-cursor-hidden
