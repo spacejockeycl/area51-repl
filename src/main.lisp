@@ -35,9 +35,8 @@
   (when *repl-flush-screen-p* (flush-screen))
   (with-cursor-hidden
     (format t "~a~2%" *versions*))
-  ;; (in-package :cl-user)
   (unwind-protect
-    (conium:call-with-debugger-hook #'debugger #'repl)
+    (repl)
     (rl:deprep-terminal))
   (when *repl-flush-screen-p* (flush-screen)))
 
