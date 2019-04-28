@@ -14,7 +14,6 @@ What this project tries to achieve are listed here.
 - [x] tab-completion of symbols.
 - [x] simple installation instruction.
 - [x] code editting with text editor.
-- [ ] useful debugger & inspector. (incomplete)
 - [x] syntax highlighting of input texts.
 - [ ] implementation independence. (only SBCL supported)
 

@@ -4,8 +4,6 @@
 #|
 (setf *default-prompt-function*
   #'(lambda () "* "))
-(setf *debugger-prompt-function*
-  #'(lambda () (format nil "~d] " (1- *debugger-level*))))
 (setf *output-indicator-function*
   #'(lambda () ""))
 |#

@@ -1,8 +1,7 @@
 (in-package #:cl-repl)
 
-(define-command run (filename &rest args)
+(define-command run (filename)
   "Execute file in current enviroment."
-  (declare (ignore args))
   (if (probe-file filename)
       (let ((code (format nil "(progn ~a )" (read-file-into-string filename))))
         (if (line-continue-p code)
@@ -18,23 +17,39 @@
   (message "Evaluating edited code...~%")
   (invoke-command "%run" filename))
 
-(define-command edit (&optional filename &rest args)
+(define-command edit-string (string)
+    "Edit string with text editor specified by $EDITOR.
+Creates a temporary file with the string's content.
+Returns a new string."
+  (let ((editor (uiop:getenv "EDITOR")))
+    (uiop:with-temporary-file
+        (:stream output
+         :pathname pathname
+         :type "lisp"
+         :prefix "cl-repl-edit"
+         :suffix "")
+      (write-string string output)
+      (close output)
+      (edit-file-and-read editor pathname))))
+
+(define-command edit (&optional filename)
   "Edit code with text editor specified by $EDITOR."
-  (declare (ignore args))
   (let ((editor (uiop:getenv "EDITOR")))
     (if (null filename)
         (uiop:with-temporary-file
-            (:stream s :pathname p :type "lisp" :prefix "cl-repl-edit" :suffix "")
-          (setf filename (namestring p))
-          (message "CL-REPL will make a temporary file named: ~a~%" filename)
-          (format s "#|-*- mode:lisp -*-|#~2%")
-          (close s)
+            (:stream output
+             :pathname pathname
+             :type "lisp"
+             :prefix "cl-repl-edit"
+             :suffix "")
+          (message "~&editing temporary file \"~a\"~%" (namestring pathname))
+          (format output  "#|-*- mode:lisp -*-|#~2%")
+          (close output)
           (edit-file-and-read editor filename))
         (edit-file-and-read editor filename))))
 
-(define-command cd (&optional (dest (uiop:getenv "HOME")) &rest args)
+(define-command cd (&optional (dest (uiop:getenv "HOME")))
   "Change working directory."
-  (declare (ignore args))
   (handler-case
       (progn
         (setf dest (truename dest))
@@ -57,37 +72,8 @@
         (message "Error: Unexpected EOF.")
         code)))
 
-(define-command inspect (object &rest args)
-  "Alias to (inspect <object>)."
-  (declare (ignore args))
-  (let ((code (format nil "(inspect ~a)" object)))
-    (if (line-continue-p code)
-        (message "Error: Unexpected EOF.")
-        code)))
-
-(define-command step (&rest forms)
-  "Alias to (step <form>)."
-  (let ((code (format nil "(step ~{ ~a~})" forms)))
-    (if (line-continue-p code)
-        (message "Error: Unexpected EOF.")
-        code)))
-
-#+quicklisp
-(define-command load (&rest systems)
-  "Alias to (ql:quickload '(<system>...) :silent t)."
-  (loop :repeat (length systems)
-        :for system := (pop systems) :while system
-        :do (handler-case
-                (progn
-                  (ql:quickload (intern system :keyword) :silent t)
-                  (message "Loaded.: `~a`" system))
-              (error (c) (message "Failed to load system.: `~a`: ~a" system c)))
-        :when (car systems) :do (terpri)
-        :finally (return "nil")))
-
-(define-command package (&optional (package "cl-user") &rest args)
+(define-command package (&optional (package "cl-user"))
   "Alias to (in-pacakge <package>)."
-  (declare (ignore args))
   (handler-case
       (let ((p (current-package)))
         (setf *package* (find-package (read-from-string package)))
@@ -95,9 +81,8 @@
     (error () (message "Failed to change package."))))
 
 
-(define-command doc (target &rest args)
+(define-command doc (target)
   "Show description of given object."
-  (declare (ignore args))
   (handler-case
       (let ((s (make-array '(0)
                            :element-type 'base-char
@@ -109,19 +94,21 @@
         "nil")
     (error () (message "No description given on `~a.`" target))))
 
-(define-command clear (&rest args)
-  "Clear screen."
-  (declare (ignore args))
-  (uiop:run-program "clear" :output *standard-output*)
-  (when (> *debugger-level* 0)
-    (debugger-banner))
-  (read-input))
-
-#+out-of-date
 (define-command help (&rest args)
   "List available command commands and usages."
   (declare (ignore args))
-  (loop :for (name body) :in *command*
-        :do (format t "~16,,a~a~%" name (documentation body 'function)))
-  "nil")
+  (let* ((commands *commands*)
+         (max-name-length (loop :for name :being :the :hash-key :of commands
+                            :maximize (length name))))
+    (loop :for name :being :the :hash-key :of commands
+            :using (hash-value command)
+          :do (format t "~v,,a~a~%"
+                      (min 16 (+ 2 max-name-length))
+                      name
+                      (first-line (command-description command))))))
+
+(define-command swank ()
+    "load swank and create a server"
+    (require "swank")
+  (uiop:symbol-call :swank :create-server :dont-close t))
 

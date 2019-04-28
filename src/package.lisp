@@ -20,16 +20,7 @@
 
            ;; Prompt settings
            #:*default-prompt-function*
-           #:*debugger-prompt-function*
-           #:*output-indicator-function*
-
-           ;; Why is this exported?
-           #:*debugger-level*
-
-           ;; Buffering
-           #:*repl-flush-screen*
-           #:*debugger-flush-screen*
-           #:*inspector-flush-screen*))
+           #:*output-indicator-function*))
 
 (defpackage :repl-user
   (:use :cl :cl-repl))

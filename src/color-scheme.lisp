@@ -2,7 +2,6 @@
 
 ;; States
 (defparameter *default-prompt-color* nil)
-(defparameter *debugger-prompt-color* nil)
 (defparameter *output-indicator-color* nil)
 (defparameter *splash-color* nil)
 (defparameter *condition-color* nil)
@@ -58,7 +57,6 @@
   ("boolean-syntax" +deep-pink+)
   ("normal-syntax" nil)
   ("default-prompt" +green+)
-  ("debugger-prompt" +red+)
   ("output-indicator" +red+)
   ("condition" +red+)
   ("section" +blue+)                    ; 21
@@ -77,7 +75,6 @@
   ("boolean-syntax" nil)
   ("normal-syntax" nil)
   ("default-prompt" nil)
-  ("debugger-prompt" nil)
   ("output-indicator" nil)
   ("condition" nil)
   ("section" nil)

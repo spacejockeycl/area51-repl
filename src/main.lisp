@@ -1,10 +1,12 @@
 (in-package #:cl-repl)
 
-(defconstant +version+ '0.6.4)
+(defun version ()
+  (asdf/component:component-version
+   (asdf/find-system:find-system '#:cl-repl)))
 
 (defvar *versions*
   (format nil "cl-repl ~a on ~a ~a"
-          +version+
+          (version)
           (lisp-implementation-type)
           (lisp-implementation-version)))
 
@@ -20,24 +22,17 @@
         (format *error-output* "Failed to load ~a, quitting.~%[~a]~%" *site-init-path* c)
         (uiop:quit 1)))))
 
-(defparameter *repl-flush-screen-p* nil
-  "Do you want to flush the screen before and after the repl is run?")
-
 (defun setup-readline ()
   (cffi:load-foreign-library 'cl-readline:readline)
   (enable-syntax)
   (rl:register-function :complete #'completer)
-  (install-inspector))
+  (init-keymap))
 
 (defun main ()
   (setup-readline)
   (site-init)
-  (when *repl-flush-screen-p* (flush-screen))
-  (with-cursor-hidden
-    (format t "~a~2%" *versions*))
   (unwind-protect
     (repl)
-    (rl:deprep-terminal))
-  (when *repl-flush-screen-p* (flush-screen)))
+    (rl:deprep-terminal)))
 
 

@@ -23,8 +23,6 @@
                              (:file "commands")
                              (:file "shell")
                              (:file "completer")
-                             (:file "inspector")
-                             (:file "input")
                              (:file "repl")
                              (:file "main"))))
   :description "A full-featured repl implementation."
