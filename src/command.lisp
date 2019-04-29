@@ -39,6 +39,8 @@
                               (list 'quote name)
                               (symbolicate name))))
         `(progn
+           ;; This check is made at runtime to be able to programmatically
+           ;; generate commands with proper description
            (check-type ,description string)
            (setf (gethash (string-downcase ,symbol) *commands*)
                  (make-command :name ,symbol

@@ -100,3 +100,8 @@ Returns a new string."
     (require "swank")
   (uiop:symbol-call :swank :create-server :dont-close t))
 
+#+quicklisp
+(define-command quickload (&rest systems)
+    "load systems with quicklisp"
+    (ql:quickload systems))
+
