@@ -34,6 +34,7 @@ Useful for multiline entries."
 (defun preprocess-input (input)
   "handles !, % and EOF"
    (cond
+     ;; TODO replace split-space by something that handles quotes
      ((command-p input) (apply #'invoke-command (split-space input)) nil)
      ((shell-command-p input) (run-shell-command input) nil)
      ((string= "" input) nil)
@@ -42,6 +43,8 @@ Useful for multiline entries."
 
 (defun read-input1 (&key (multiline-p nil))
   "readline"
+  (unless multiline-p
+    (fresh-line))
   (finish-output)
   (rl:readline :prompt (prompt :multiline-p multiline-p)
                :add-history t))

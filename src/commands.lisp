@@ -1,62 +1,49 @@
 (in-package #:cl-repl)
 
-(define-command run (filename)
-  "Execute file in current enviroment."
-  (if (probe-file filename)
-      (let ((code (format nil "(progn ~a )" (read-file-into-string filename))))
-        (if (line-continue-p code)
-            (message "Error: Unexpected EOF.")
-            code))
-      (message "Error: File not found.")))
+(defun edit-file (pathname)
+  "Open $EDITOR"
+  (message "Openning file: \"~a\"~%" pathname)
+  (let ((editor (uiop:getenv "EDITOR")))
+    (uiop:run-program (list editor "-b" (namestring pathname))
+                      :input :interactive
+                      :output :interactive)))
 
-(defun edit-file-and-read (editor filename)
-  (message "Openning file: ~a~%" filename)
-  (uiop:run-program (list editor filename)
-                    :input :interactive
-                    :output :interactive)
-  (message "Evaluating edited code...~%")
-  (invoke-command "%run" filename))
+(defun edit-file-and-load (pathname)
+  (edit-file pathname)
+  (message "Loading edited file...~%")
+  (load pathname))
 
-(define-command edit-string (string)
-    "Edit string with text editor specified by $EDITOR.
+(defun edit-file-and-read (pathname)
+  (edit-file pathname)
+  (read-file-into-string pathname))
+
+(defun edit-string (string)
+  "Edit string with text editor specified by $EDITOR.
 Creates a temporary file with the string's content.
 Returns a new string."
-  (let ((editor (uiop:getenv "EDITOR")))
-    (uiop:with-temporary-file
-        (:stream output
-         :pathname pathname
-         :type "lisp"
-         :prefix "cl-repl-edit"
-         :suffix "")
-      (write-string string output)
-      (close output)
-      (edit-file-and-read editor pathname))))
+  (uiop:with-temporary-file
+      (:stream output
+       :pathname pathname
+       :type "lisp"
+       :prefix "cl-repl-edit"
+       :suffix "")
+    (write-string string output)
+    (close output)
+    (edit-file-and-read pathname)))
 
-(define-command edit (&optional filename)
-  "Edit code with text editor specified by $EDITOR."
-  (let ((editor (uiop:getenv "EDITOR")))
-    (if (null filename)
-        (uiop:with-temporary-file
-            (:stream output
-             :pathname pathname
-             :type "lisp"
-             :prefix "cl-repl-edit"
-             :suffix "")
-          (message "~&editing temporary file \"~a\"~%" (namestring pathname))
-          (format output  "#|-*- mode:lisp -*-|#~2%")
-          (close output)
-          (edit-file-and-read editor filename))
-        (edit-file-and-read editor filename))))
-
-(define-command cd (&optional (dest (uiop:getenv "HOME")))
+(define-command cd (&optional (destination (uiop:getenv "HOME")))
   "Change working directory."
   (handler-case
       (progn
-        (setf dest (truename dest))
-        (uiop:chdir dest)
-        (setf *default-pathname-defaults* dest)
-        (format nil "~s"dest))
+        (setf destination (truename destination))
+        (uiop:chdir destination)
+        (setf *default-pathname-defaults* destination)
+        (format t "~s" destination))
     (error () (message "No such directory."))))
+
+(define-command pwd ()
+    "Show current working directory."
+  (format t "~s~%" *default-pathname-defaults*))
 
 (define-command time (&rest forms)
   "Alias to (time <form>)."
@@ -95,13 +82,14 @@ Returns a new string."
     (error () (message "No description given on `~a.`" target))))
 
 (define-command help (&rest args)
-  "List available command commands and usages."
+    "List available command commands and usages."
   (declare (ignore args))
   (let* ((commands *commands*)
+         (keys (sort (hash-table-keys commands) #'string<))
          (max-name-length (loop :for name :being :the :hash-key :of commands
-                            :maximize (length name))))
-    (loop :for name :being :the :hash-key :of commands
-            :using (hash-value command)
+                                :maximize (length name))))
+    (loop :for name :in keys
+          :for command = (gethash name commands)
           :do (format t "~v,,a~a~%"
                       (min 16 (+ 2 max-name-length))
                       name

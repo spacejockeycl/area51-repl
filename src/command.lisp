@@ -66,17 +66,10 @@
 
 (defun invoke-command (name &rest args)
     (if (find-command name)
-        #+before (handler-case (apply body args)
-                   (error (c) (message "Error: ~a" c)))
         (apply (find-command-function name) args)
         (message "Command not found.: ~a" name)))
 
 (defun command-p (&optional input)
   "Is the given input a command?"
   (starts-with #\% input))
-
-
-
-
-
 
