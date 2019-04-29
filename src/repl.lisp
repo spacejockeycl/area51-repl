@@ -101,8 +101,9 @@ Useful for multiline entries."
             (with-extra-restarts (eval-print -)))))
 
 (defun repl ()
-  (loop :when (not (eq *keymap* 'default))
-          :do (set-keymap 'default)
-        :until (eq +exit+
-                   (catch 'exit (read-eval-print)))))
+  (catch 'exit
+    (loop :when (not (eq *keymap* 'default))
+            :do (set-keymap 'default)
+          :until (eq +exit+
+                     (read-eval-print)))))
 
