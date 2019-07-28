@@ -90,7 +90,7 @@ Returns a new string."
                                 :maximize (length name))))
     (loop :for name :in keys
           :for command = (gethash name commands)
-          :do (format t "~v,,a~a~%"
+          :do (format t "%~v,,a~a~%"
                       (min 16 (+ 2 max-name-length))
                       name
                       (first-line (command-description command))))))
