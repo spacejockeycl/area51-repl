@@ -12,7 +12,7 @@
 
 (defun current-package ()
   "Return the current-package-name or its first nickname if it exists."
-  (or (first (package-nicknames *package*))
+  (or (first (package-nicknames *package*)) ;; TODO Choose the shortest nickname.
       (package-name *package*)))
 
 (defun prompt (&key (multiline-p nil))
