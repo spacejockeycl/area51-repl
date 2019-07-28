@@ -21,15 +21,6 @@
   (make-hash-table :test #'equal)
   "Contains the commands that can be run at the toplevel repl with the \"%\" prefix.")
 
-(parse-body '((declare (ignore args))
-              (if (probe-file filename)
-                  (let ((code (format nil "(progn ~a )" (read-file-into-string filename))))
-                    (if (line-continue-p code)
-                        (message "Error: Unexpected EOF.")
-                        code))
-                  (message "Error: File not found.")))
-            :documentation "Asdf")
-
 (defmacro define-command (name args description &body body)
   "Define a command, it's just like a function."
   (multiple-value-bind (actual-body declarations documentation)
