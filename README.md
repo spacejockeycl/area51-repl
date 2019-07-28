@@ -1,12 +1,35 @@
 > This is a fork of koji-kojiro/cl-repl
+
+# Main differences with the original
+
+* This is more of a library. It makes sure you can save a lisp image and load
+it without issues.
+* no "magic" commands, just functions with %special syntax
+* no rowsell integration - it doesn't assume you use roswell
+* no config file - use your implementation's if you need to
+* no integration with python/perl/ruby - add it yourself if need to
+* no debugger or inspector - they weren't complete
+* no splash "screen" - it used to print an ascii art banner and version.
+* doesn't flush (clear) the screen unless the user ask for it
+
+# More about commands
+
+In the original cl-repl, the commands are functions that returns code to
+execute. For example, the magic command `%run` used to run a lisp file
+in the current environment was implemented by reading a file as s-expression
+and simply returning them. In this fork, that magic command is simply not
+implemented because one can simply use `cl:load`.
+
+---
+
 # CL-REPL
 [![Build Status](https://travis-ci.org/fstamour/cl-repl.svg?branch=master)](https://travis-ci.org/fstamour/cl-repl)
 [![License](http://img.shields.io/badge/license-GPLv3-blue.svg?style=flat)](https://github.com/fstamour/cl-repl/blob/master/LICENSE)
 [![GitHub tag](https://img.shields.io/github/tag/fstamour/cl-repl.svg?style=flat)](https://github.com/fstamour/cl-repl/releases)
-[![Quicklisp dist](http://quickdocs.org/badge/cl-repl.svg)](http://quickdocs.org/cl-repl/)
 
 # Overview
-This project aims to provide a beginner-friendly REPL for Common Lisp with rich functionalities, such as IPython for Python.
+This project aims to provide a beginner-friendly REPL for Common Lisp with rich
+functionalities, such as IPython for Python.
 
 What this project tries to achieve are listed here.
 
@@ -19,7 +42,7 @@ What this project tries to achieve are listed here.
 
 # Installation
 
-Before installation, please ensure that gnu readline is installed.  
+Before installation, please ensure that gnu readline is installed.
 If you use OSX, you might need to execute following command.
 
 ```
@@ -42,13 +65,9 @@ Some useful commands are ready to use. To list available commands:
 CL-USER> %help
 ```
 
-## Configuration
-You can customize CL-REPL by editting `~/.replrc`. You can change appearance, add your own commands, and do anything you want when startup.  
-An example can be found [here](./replrc-example).
-
 ## Syntax highlighting
-Syntax highlighiting of input area is new in v0.5.0.
-If you want to disable it, put the following in your `.replrc`.
+
+If you want to disable it, run the following
 
 ```
 (disable-syntax)
@@ -58,17 +77,19 @@ If you want to disable it, put the following in your `.replrc`.
 If the line starts with `!`, excute it as shell command, e.g. `!ls -a`.
 
 ## %edit
-Line editting in repl is sometimes painful. CL-REPL allows yot to edit code with your favorite text editor. 
+Line editting in repl is sometimes painful. CL-REPL allows yot to edit code
+with your favorite text editor.
 
 ```
 CL-REPL> %edit <filename>
 ```
 
-CL-REPL invokes a text editor specified by `$EDITOR`.  
-After editting code, save and close it. Then repl will start to evaluate it.  
-If `<filename>` is not supplied, a temporary file will be created and deleted after evaluation.  
+CL-REPL invokes a text editor specified by `$EDITOR`.
+After editting code, save and close it. Then repl will start to evaluate it.
+If `<filename>` is not supplied, a temporary file will be created and deleted
+after evaluation.
 
-We've be sure the following editors work properly.  
+We've made sure the following editors work properly.
 
 - vi & vim
 - GNU Emacs
@@ -76,7 +97,7 @@ We've be sure the following editors work properly.
 - Lem
 
 # Contributing
-Don't hesitate to open issues or to send PRs.  
+Don't hesitate to open issues or to send PRs.
 Any suggestions are always welcomed.
 
 # Author
