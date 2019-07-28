@@ -10,18 +10,6 @@
           (lisp-implementation-type)
           (lisp-implementation-version)))
 
-;; TODO use xdg's ~/.config folder instead
-(defvar *site-init-path* #P"~/.replrc")
-
-(defun site-init ()
-  (unless (probe-file *site-init-path*)
-    (return-from site-init))
-  (handler-case (load *site-init-path*)
-    (error (c)
-      (progn
-        (format *error-output* "Failed to load ~a, quitting.~%[~a]~%" *site-init-path* c)
-        (uiop:quit 1)))))
-
 (defun setup-readline ()
   (cffi:load-foreign-library 'cl-readline:readline)
   (enable-syntax)
@@ -30,7 +18,6 @@
 
 (defun main ()
   (setup-readline)
-  (site-init)
   (unwind-protect
     (repl)
     (rl:deprep-terminal)))
