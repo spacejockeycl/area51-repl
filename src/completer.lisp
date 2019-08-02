@@ -1,32 +1,32 @@
 (in-package :cl-repl)
 
 (defun get-package-for-search (text)
-  (let ((pos))
+  (let ((position))
     (cond
-      ((setf pos (search "::" text))
-       (list  (subseq text  (+ pos 2)) (subseq text 0 pos) nil))
-      ((setf pos (position #\: text))
-       (if (zerop pos)
+      ((setf position (search "::" text))
+       (list  (subseq text  (+ position 2)) (subseq text 0 position) nil))
+      ((setf position (position #\: text))
+       (if (zerop position)
          (list text nil t)
-         (list (subseq text (1+ pos)) (subseq text 0 pos) t)))
+         (list (subseq text (1+ position)) (subseq text 0 position) t)))
       (t (list text nil  t)))))
 
-(defun list-external-symbols (sym-name pkg-name)
-  (loop :for sym :being :the :external-symbols :of (find-package pkg-name)
-        :collect (format nil "~(~a:~a~)" pkg-name sym)))
+(defun list-external-symbols (symbol-name package-name)
+  (loop :for symbol :being :the :external-symbols :of (find-package package-name)
+        :collect (format nil "~(~a:~a~)" package-name symbol)))
 
-(defun list-internal-symbols (sym-name pkg-name)
-  (loop :for sym :being :the :symbols :of (find-package pkg-name)
-        :collect (format nil "~(~a::~a~)" pkg-name sym)))
+(defun list-internal-symbols (symbol-name package-name)
+  (loop :for symbol :being :the :symbols :of (find-package package-name)
+        :collect (format nil "~(~a::~a~)" package-name symbol)))
 
-(defun list-symbols-and-packages (sym-name)
+(defun list-symbols-and-packages (symbol-name)
   (concatenate 'list
-    (loop :for pkg :in (list-all-packages)
-          :append (loop :for name :in (package-nicknames pkg)
+    (loop :for package :in (list-all-packages)
+          :append (loop :for name :in (package-nicknames package)
                         :collect (format nil "~(~a:~)" name))
-          :collect (format nil "~(~a:~)" (package-name pkg)))
-    (loop :for sym :being :the :symbols :of *package*
-          :collect (string-downcase sym))
+          :collect (format nil "~(~a:~)" (package-name package)))
+    (loop :for symbol :being :the :symbols :of *package*
+          :collect (string-downcase symbol))
     (loop :for kw :being :the :symbols :of (find-package "KEYWORD")
           :collect (format nil ":~(~a~)" kw))))
 
@@ -47,16 +47,16 @@
          prefix-matches))))
 
 (defun complete-symbol (text)
-  (destructuring-bind (sym-name pkg-name external-p)
+  (destructuring-bind (symbol-name package-name external-p)
       (get-package-for-search (string-upcase text))
-    (if (and pkg-name (not (find-package pkg-name)))
+    (if (and package-name (not (find-package package-name)))
         nil
         (select-completions
          (string-downcase text)
          (cond
-           ((zerop (length pkg-name)) (list-symbols-and-packages sym-name))
-           (external-p (list-external-symbols sym-name pkg-name))
-           (t (list-internal-symbols sym-name pkg-name)))))))
+           ((zerop (length package-name)) (list-symbols-and-packages symbol-name))
+           (external-p (list-external-symbols symbol-name package-name))
+           (t (list-internal-symbols symbol-name package-name)))))))
 
 (defun complete-command (text)
   (select-completions
