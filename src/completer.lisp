@@ -31,6 +31,7 @@
           :collect (format nil ":~(~a~)" kw))))
 
 (defun select-completions (text items)
+  "Given a text and list of string (items), returns a list of macthes"
   (let ((prefix-matches (loop :for item :in items
                               :when (starts-with-subseq text item)
                                 :collect item)))
@@ -59,16 +60,26 @@
            (t (list-internal-symbols symbol-name package-name)))))))
 
 (defun complete-command (text)
+  "complete %commands"
   (select-completions
    (string-downcase text)
    (loop :for name :in (hash-table-keys *commands*)
          :collect (concatenate 'string "%" name))))
 
+(defun complete-system (text)
+  "complete the command %quickload"
+  (select-completions
+   (string-downcase text)
+   (mapcar #'ql-dist:name
+           (ql:system-list))))
+
 (defun %complete (text start end)
   (declare (ignore start end))
-  (unless (zerop (length text))
-    (or (complete-symbol text)
-        (complete-command text))))
+  (if (starts-with-subseq "%quickload" rl:*line-buffer*)
+      (complete-system text)
+      (unless (zerop (length text))
+        (or (complete-symbol text)
+            (complete-command text)))))
 
 ;; This function is used by readline, if it is updated, you need to call
 ;; rl:register-funciton again. To prevent that, we call another function
