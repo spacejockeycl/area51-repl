@@ -1,4 +1,4 @@
-(in-package :cl-repl)
+(in-package :area51-repl)
 
 (defun split-lines (text)
   (ppcre:split "\\n+" text))

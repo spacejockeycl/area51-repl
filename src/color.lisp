@@ -1,4 +1,4 @@
-(in-package #:cl-repl)
+(in-package #:area51-repl)
 
 (defun color (color string)
   "Wrap string in escape code for the given color, or return the string unchanged if color is nil."

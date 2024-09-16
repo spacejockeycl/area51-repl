@@ -1,4 +1,4 @@
-(in-package #:cl-repl)
+(in-package #:area51-repl)
 
 (define-colors
   0 black

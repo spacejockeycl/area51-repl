@@ -1,4 +1,4 @@
-(in-package :cl-repl)
+(in-package :area51-repl)
 
 (defun shell-command-p (&optional input)
   "Is the given input a shell command?"

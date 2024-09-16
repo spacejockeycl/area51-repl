@@ -1,4 +1,4 @@
-(in-package #:cl-repl)
+(in-package #:area51-repl)
 
 (defun edit-file (pathname)
   "Open $EDITOR"
@@ -25,7 +25,7 @@ Returns a new string."
       (:stream output
        :pathname pathname
        :type "lisp"
-       :prefix "cl-repl-edit"
+       :prefix "area51-repl-edit"
        :suffix "")
     (write-string string output)
     (close output)

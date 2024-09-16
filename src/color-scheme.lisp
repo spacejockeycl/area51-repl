@@ -1,4 +1,4 @@
-(in-package :cl-repl)
+(in-package :area51-repl)
 
 ;; States
 (defparameter *default-prompt-color* nil)
@@ -35,7 +35,7 @@
 
 ;; FIXME code smell: eval
 (defun set-color (spec color)
-  (eval (read-from-string (format nil "(setf cl-repl::*~a-color* ~a)" spec color))))
+  (eval (read-from-string (format nil "(setf area51-repl::*~a-color* ~a)" spec color))))
 
 (defun color-scheme (name)
   (let ((scheme (find-color-scheme name)))

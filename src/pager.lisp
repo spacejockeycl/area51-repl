@@ -1,4 +1,4 @@
-(in-package :cl-repl)
+(in-package :area51-repl)
 
 (defparameter *pager-command* "less")
 (defparameter *pager-minimum-line-count* 20)

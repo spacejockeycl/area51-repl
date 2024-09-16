@@ -1,4 +1,4 @@
-(in-package :cl-repl)
+(in-package :area51-repl)
 
 (defun get-package-for-search (text)
   (let ((position))

@@ -1,8 +1,8 @@
 (in-package :cl-user)
 
-(defpackage :cl-repl
+(defpackage :area51-repl
   (:use :cl #:alexandria)
-  (:export #:main
+  (:export #:start
 
            ;; Command
            #:define-command
@@ -23,4 +23,4 @@
            #:*output-indicator-function*))
 
 (defpackage :repl-user
-  (:use :cl :cl-repl))
+  (:use :cl :area51-repl))

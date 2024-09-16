@@ -1,14 +1,15 @@
 
-(defsystem cl-repl
-  :version "0.6.4"
-  :author "TANI Kojiro, Francis St-Amour"
+(defsystem area51-repl
+  :version "0.1.0"
+  :author "TANI Kojiro, Francis St-Amour, MJ Stahl"
   :license "GPLv3"
   :depends-on (#:alexandria
                #:uiop
                #:unix-opts
                #:conium
                #:cl-ppcre
-               #:cl-readline)
+               #:cl-readline
+               #:magic-ed)
   :serial t
   :components ((:module "src"
                 :components ((:file "package")

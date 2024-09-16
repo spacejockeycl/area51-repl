@@ -1,11 +1,11 @@
-(in-package #:cl-repl)
+(in-package #:area51-repl)
 
 (defun version ()
   (asdf/component:component-version
-   (asdf/find-system:find-system '#:cl-repl)))
+   (asdf/find-system:find-system '#:area51-repl)))
 
 (defvar *versions*
-  (format nil "cl-repl ~a on ~a ~a"
+  (format nil "area51-repl ~a on ~a ~a"
           (version)
           (lisp-implementation-type)
           (lisp-implementation-version)))
@@ -16,7 +16,7 @@
   (rl:register-function :complete #'complete)
   (init-keymap))
 
-(defun main ()
+(defun start ()
   (setup-readline)
   (unwind-protect
     (repl)

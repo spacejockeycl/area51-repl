@@ -1,4 +1,4 @@
-(in-package :cl-repl)
+(in-package :area51-repl)
 
 (unless (boundp '+exit+)
   (defconstant +exit+ '#:exit))
@@ -87,7 +87,7 @@ Useful for multiline entries."
 (defmacro with-extra-restarts (form &body restarts)
   `(restart-case ,form
      (*abort () :report "Reduce debugger level." t)
-     (*exit () :report "Exit CL-REPL." (throw 'exit nil))
+     (*exit () :report "Exit area51-REPL." (throw 'exit nil))
      ,@restarts))
 
 (defun read-eval-print ()

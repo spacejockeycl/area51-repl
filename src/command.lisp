@@ -1,4 +1,4 @@
-(in-package #:cl-repl)
+(in-package #:area51-repl)
 
 ;; Having commands is a pretty common pattern, for inspiration, take a look at:
 ;;
