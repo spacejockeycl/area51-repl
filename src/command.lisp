@@ -1,17 +1,5 @@
 (in-package #:area51-repl)
 
-;; Having commands is a pretty common pattern, for inspiration, take a look at:
-;;
-;; SBCL ACL REPL
-;; https://github.com/sbcl/sbcl/blob/419bef671943cd71ef6c4a097551c893742dddde/contrib/sb-aclrepl/repl.lisp
-;;
-;; StumpWM
-;; https://github.com/stumpwm/stumpwm/blob/4653857b5039d29ef2b0fedfe3e4c656bd000c41/command.lisp
-;;
-;; Climacs (v2)
-;; https://github.com/robert-strandh/Second-Climacs/blob/ed1dda65ce51a713207d88915c71ae56e15b7c23/Command/command.lisp
-
-
 (defstruct command
   name
   description
@@ -30,27 +18,27 @@
                               (list 'quote name)
                               (symbolicate name))))
         `(progn
-           ;; This check is made at runtime to be able to programmatically
-           ;; generate commands with proper description
-           (check-type ,description string)
-           (setf (gethash (string-downcase ,symbol) *commands*)
-                 (make-command :name ,symbol
-                               :description ,description
-                               :function #'(lambda ,args
-                                             ,@declarations
-                                             ,(or documentation description)
-                                             ,@actual-body)))))))
+            ;; This check is made at runtime to be able to programmatically
+            ;; generate commands with proper description
+            (check-type ,description string)
+            (setf (gethash (string-downcase ,symbol) *commands*)
+              (make-command 
+                :name ,symbol
+                :description ,description
+                :function #'(lambda ,args
+                              ,@declarations
+                              ,(or documentation description)
+                              ,@actual-body)))))))
 
-;; TODO use a function instead
-(defmacro message (message &rest args)
-  "Print a message on the standard ouput, with color"
-  `(progn
-     (format t ,(color *message-color* message) ,@args)
-     (finish-output)
-     "nil"))
+(defun message (message &rest args)
+  "Print a message on standard output, with color"
+  (progn
+    (format t (color *message-color* message) args)
+    (finish-output)
+    "nil"))
 
 (defun find-command (name)
-  ;; name has the form "%name"
+  ;; name has the form ".name"
   (gethash (subseq name 1) *commands*))
 
 (defun find-command-function (name)
@@ -60,9 +48,9 @@
 (defun invoke-command (name &rest args)
     (if (find-command name)
         (apply (find-command-function name) args)
-        (message "Command not found.: ~a" name)))
+        (message "Command not found: ~a" name)))
 
 (defun command-p (&optional input)
   "Is the given input a command?"
-  (starts-with #\% input))
+  (starts-with #\. input))
 

@@ -16,11 +16,9 @@
            (> (/ (length (ppcre:all-matches "\\n" text)) 2)
               *pager-minimum-line-count*))
       (uiop:run-program
-       (format nil "echo ~s | ~a"
-               text
-               *pager-command*)
-       :ignore-error-status t
-       :input :interactive
-       :output :interactive)
+        (format nil "echo ~s | ~a" text *pager-command*)
+        :ignore-error-status t
+        :input :interactive
+        :output :interactive)
       (format t text)))
 

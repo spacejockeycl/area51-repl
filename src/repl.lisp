@@ -19,35 +19,36 @@
   "Return a prompt string with color appropriate for the current context."
   (let ((prompt-string (funcall *default-prompt-function*)))
     (color *default-prompt-color*
-           (if multiline-p
-               (format nil "~V@{.~} " (1- (length prompt-string)) '#:dummy)
-               prompt-string))))
+      (if multiline-p
+        (format nil "~V@{.~} " (1- (length prompt-string)) '#:dummy)
+        prompt-string))))
 
 (defun line-continue-p (string)
   "Returns true when the string is an incomplete expression.
 Useful for multiline entries."
-  (and (stringp string)
-       (let ((*read-eval* nil))
-         (handler-case (progn (read-from-string string) nil)
-           (end-of-file () t)))))
+  (and 
+    (stringp string)
+    (let ((*read-eval* nil))
+      (handler-case (progn (read-from-string string) nil)
+        (end-of-file () t)))))
 
 (defun preprocess-input (input)
   "handles !, % and EOF"
-   (cond
-     ;; TODO replace split-space by something that handles quotes
-     ((command-p input) (apply #'invoke-command (split-space input)) nil)
-     ((shell-command-p input) (run-shell-command input) nil)
-     ((string= "" input) nil)
-     ((null input) (confirm-exit))
-     (t input)))
+  (cond
+    ;; TODO replace split-space by something that handles quotes
+    ((command-p input) (apply #'invoke-command (split-space input)) nil)
+    ;; TODO remove this
+    ((shell-command-p input) (run-shell-command input) nil)
+    ((string= "" input) nil)
+    ((null input) (confirm-exit))
+    (t input)))
 
 (defun read-input1 (&key (multiline-p nil))
   "readline"
   (unless multiline-p
     (fresh-line))
   (finish-output)
-  (rl:readline :prompt (prompt :multiline-p multiline-p)
-               :add-history t))
+  (rl:readline :prompt (prompt :multiline-p multiline-p) :add-history t))
 
 (defun read-input ()
   "read form"
@@ -56,9 +57,9 @@ Useful for multiline entries."
     :while (line-continue-p input)
     :for more-input = (read-input1 :multiline-p t)
     :do
-       (unless more-input
-         (terpri))
-       (setf input (format nil "~a~%~a" input more-input))
+      (unless more-input
+        (terpri))
+      (setf input (format nil "~a~%~a" input more-input))
     :finally (return-from read-input input)))
 
 (defun confirm-exit ()
@@ -68,7 +69,7 @@ Useful for multiline entries."
 
 (defun print-result (values)
   (format t "~&~a~{~s ~}~%"
-          (color *output-indicator-color* (funcall *output-indicator-function*)) values)
+    (color *output-indicator-color* (funcall *output-indicator-function*)) values)
   (finish-output) t)
 
 (defun eval-print (form)
@@ -86,9 +87,9 @@ Useful for multiline entries."
 
 (defmacro with-extra-restarts (form &body restarts)
   `(restart-case ,form
-     (*abort () :report "Reduce debugger level." t)
-     (*exit () :report "Exit area51-REPL." (throw 'exit nil))
-     ,@restarts))
+      (*abort () :report "Reduce debugger level." t)
+      (*exit () :report "Exit Area51-REPL." (throw 'exit nil))
+      ,@restarts))
 
 (defun read-eval-print ()
   (with-extra-restarts
@@ -104,6 +105,5 @@ Useful for multiline entries."
   (catch 'exit
     (loop :when (not (eq *keymap* 'default))
             :do (set-keymap 'default)
-          :until (eq +exit+
-                     (read-eval-print)))))
+          :until (eq +exit+ (read-eval-print)))))
 

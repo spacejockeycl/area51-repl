@@ -11,11 +11,11 @@
 (defmacro define-color (number name)
   (let ((symbol (symbolicate #\+ name #\+)))
     `(progn
-       (defconstant ,symbol ,number)
-       (export ',symbol))))
+        (defconstant ,symbol ,number)
+        (export ',symbol))))
 
 (defmacro define-colors (&body color-definition-list)
   `(progn
-     ,@(loop for (number name) on color-definition-list by #'cddr
-             collect `(define-color ,number ,name))))
+    ,@(loop for (number name) on color-definition-list by #'cddr
+        collect `(define-color ,number ,name))))
 

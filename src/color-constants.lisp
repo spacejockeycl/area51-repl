@@ -47,4 +47,3 @@
   39 deep-blue
   197 deep-pink
   118 chartreuse) ;; just between green and yellow
-

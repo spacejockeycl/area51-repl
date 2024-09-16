@@ -1,36 +1,5 @@
 (in-package #:area51-repl)
 
-(defun edit-file (pathname)
-  "Open $EDITOR"
-  (message "Openning file: \"~a\"~%" pathname)
-  (let ((editor (uiop:getenv "EDITOR")))
-    (uiop:run-program (list editor "-b" (namestring pathname))
-                      :input :interactive
-                      :output :interactive)))
-
-(defun edit-file-and-load (pathname)
-  (edit-file pathname)
-  (message "Loading edited file...~%")
-  (load pathname))
-
-(defun edit-file-and-read (pathname)
-  (edit-file pathname)
-  (read-file-into-string pathname))
-
-(defun edit-string (string)
-  "Edit string with text editor specified by $EDITOR.
-Creates a temporary file with the string's content.
-Returns a new string."
-  (uiop:with-temporary-file
-      (:stream output
-       :pathname pathname
-       :type "lisp"
-       :prefix "area51-repl-edit"
-       :suffix "")
-    (write-string string output)
-    (close output)
-    (edit-file-and-read pathname)))
-
 (define-command cd (&optional (destination (uiop:getenv "HOME")))
   "Change working directory."
   (handler-case
@@ -60,7 +29,7 @@ Returns a new string."
         code)))
 
 (define-command package (&optional (package "cl-user"))
-  "Alias to (in-pacakge <package>)."
+  "Alias to (in-package <package>)."
   (handler-case
       (let ((p (current-package)))
         (setf *package* (find-package (read-from-string package)))
@@ -90,7 +59,7 @@ Returns a new string."
                                 :maximize (length name))))
     (loop :for name :in keys
           :for command = (gethash name commands)
-          :do (format t "%~v,,a~a~%"
+          :do (format t ".~v,,a~a~%"
                       (min 16 (+ 2 max-name-length))
                       name
                       (first-line (command-description command))))))
