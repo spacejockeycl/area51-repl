@@ -37,8 +37,6 @@ Useful for multiline entries."
   (cond
     ;; TODO replace split-space by something that handles quotes
     ((command-p input) (apply #'invoke-command (split-space input)) nil)
-    ;; TODO remove this
-    ((shell-command-p input) (run-shell-command input) nil)
     ((string= "" input) nil)
     ((null input) (confirm-exit))
     (t input)))

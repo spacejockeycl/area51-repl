@@ -60,18 +60,17 @@
            (t (list-internal-symbols symbol-name package-name)))))))
 
 (defun complete-command (text)
-  "complete %commands"
+  "complete .commands"
   (select-completions
    (string-downcase text)
    (loop :for name :in (hash-table-keys *commands*)
-         :collect (concatenate 'string "%" name))))
+         :collect (concatenate 'string "." name))))
 
 (defun complete-system (text)
   "complete the command %quickload"
   (select-completions
-   (string-downcase text)
-   (mapcar #'ql-dist:name
-           (ql:system-list))))
+    (string-downcase text)
+    (mapcar #'ql-dist:name (ql:system-list))))
 
 (defun %complete (text start end)
   (declare (ignore start end))
