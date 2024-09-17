@@ -3,11 +3,11 @@
 (define-command cd (&optional (destination (uiop:getenv "HOME")))
   "Change directory."
   (handler-case
-      (progn
-        (setf destination (truename destination))
-        (uiop:chdir destination)
-        (setf *default-pathname-defaults* destination)
-        (format t "~s" destination))
+    (progn
+      (setf destination (truename destination))
+      (uiop:chdir destination)
+      (setf *default-pathname-defaults* destination)
+      (format t "~s" destination))
     (error () (message "No such directory."))))
 
 (define-command clear () 
@@ -18,7 +18,7 @@
   "Current directory."
   (format t "~s~%" *default-pathname-defaults*))
 
-(define-command doc (target)
+(define-command desc (target)
   "Describe the object."
   (handler-case
       (let ((s (make-array '(0)
@@ -31,9 +31,15 @@
         "nil")
     (error () (message "No description given on `~a.`" target))))
 
-(define-command edit (file)
+(define-command edit (&optional file)
   "Edit file with $EDITOR."
-  (magic-ed:magic-ed file))
+  (if file
+    (magic-ed:magic-ed file)
+    (message "Editing requires a filename.")))
+
+(define-command exit ()
+  "Exit the REPL."
+  (sb-ext:exit))
 
 (define-command help (&rest args)
   "List REPL commands."
