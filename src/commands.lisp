@@ -1,7 +1,7 @@
 (in-package #:area51-repl)
 
 (define-command cd (&optional (destination (uiop:getenv "HOME")))
-  "Change directory."
+  "Change the working directory"
   (handler-case
     (progn
       (setf destination (truename destination))
@@ -11,15 +11,15 @@
     (error () (message "No such directory."))))
 
 (define-command clear () 
-  "Clear the screen."
+  "Clear the screen"
   (flush-screen))
 
 (define-command dir ()
-  "Current directory."
+  "Display the current working directory"
   (format t "~s~%" *default-pathname-defaults*))
 
 (define-command desc (target)
-  "Describe the object."
+  "Describe the object"
   (handler-case
       (let ((s (make-array '(0)
                            :element-type 'base-char
@@ -32,17 +32,17 @@
     (error () (message "No description given on `~a.`" target))))
 
 (define-command edit (&optional file)
-  "Edit file with $EDITOR."
+  "Edit the file with $EDITOR"
   (if file
     (magic-ed:magic-ed file)
     (message "Editing requires a filename.")))
 
 (define-command exit ()
-  "Exit the REPL."
+  "Exit the REPL"
   (sb-ext:exit))
 
 (define-command help (&rest args)
-  "List REPL commands."
+  "List all REPL commands"
   (declare (ignore args))
   (let* ((commands *commands*)
          (keys (sort (hash-table-keys commands) #'string<))
