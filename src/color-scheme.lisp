@@ -9,7 +9,6 @@
 (defparameter *message-color* nil)
 
 ;; Syntaxic coloring
-(defparameter *magic-syntax-color* nil)
 (defparameter *string-syntax-color* nil)
 (defparameter *variable-syntax-color* nil)
 (defparameter *constant-syntax-color* nil)
@@ -45,7 +44,6 @@
           :do (set-color spec color))))
 
 (define-color-scheme "default" ()
-  ("magic-syntax" +deep-blue+)          ; 39
   ("string-syntax" +yellow+)            ; 184
   ("variable-syntax" +chartreuse+)      ; 118
   ("constant-syntax" +chartreuse+)
@@ -61,23 +59,5 @@
   ("condition" +red+)
   ("section" +blue+)                    ; 21
   ("message" +grey18+))
-
-(define-color-scheme "off" ()
-  ("magic-syntax" nil)
-  ("string-syntax" nil)
-  ("variable-syntax" nil)
-  ("constant-syntax" nil)
-  ("lambda-syntax" nil)
-  ("definition-syntax" nil)
-  ("keyword-syntax" nil)
-  ("special-syntax" nil)
-  ("function-syntax" nil)
-  ("boolean-syntax" nil)
-  ("normal-syntax" nil)
-  ("default-prompt" nil)
-  ("output-indicator" nil)
-  ("condition" nil)
-  ("section" nil)
-  ("message" nil))
 
 (color-scheme "default")
