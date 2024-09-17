@@ -66,19 +66,11 @@
    (loop :for name :in (hash-table-keys *commands*)
          :collect (concatenate 'string "." name))))
 
-(defun complete-system (text)
-  "complete the command %quickload"
-  (select-completions
-    (string-downcase text)
-    (mapcar #'ql-dist:name (ql:system-list))))
-
 (defun %complete (text start end)
   (declare (ignore start end))
-  (if (starts-with-subseq "%quickload" rl:*line-buffer*)
-      (complete-system text)
-      (unless (zerop (length text))
-        (or (complete-symbol text)
-            (complete-command text)))))
+  (unless (zerop (length text))
+    (or (complete-symbol text)
+        (complete-command text))))
 
 ;; This function is used by readline, if it is updated, you need to call
 ;; rl:register-funciton again. To prevent that, we call another function
