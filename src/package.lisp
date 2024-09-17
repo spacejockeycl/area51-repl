@@ -14,7 +14,6 @@
     ;; Coloring
     #:define-color-scheme
     #:color-scheme
-    #:disable-syntax
 
     ;; Paging settings
     #:*pager-command*

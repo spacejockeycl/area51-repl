@@ -12,7 +12,6 @@
 
 (defun setup-readline ()
   (cffi:load-foreign-library 'cl-readline:readline)
-  (enable-syntax)
   (rl:register-function :complete #'complete)
   (init-keymap))
 
