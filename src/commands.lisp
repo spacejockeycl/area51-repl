@@ -1,5 +1,15 @@
 (in-package #:area51-repl)
 
+(define-command cd (&optional (destination (uiop:getenv "HOME")))
+  "Change directory."
+  (handler-case
+      (progn
+        (setf destination (truename destination))
+        (uiop:chdir destination)
+        (setf *default-pathname-defaults* destination)
+        (format t "~s" destination))
+    (error () (message "No such directory."))))
+
 (define-command clear () 
   "Clear the screen."
   (flush-screen))
